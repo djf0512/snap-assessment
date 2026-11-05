@@ -10,9 +10,9 @@ select
     lower(trim(state)) as state_clean,
     zip_code as zip_code_raw,
     CASE
-    WHEN REGEXP_MATCHES(TRIM(zip_code), '^[0-9]{5}(-[0-9]{4}|[0-9]{4})?$')
-        THEN LEFT(TRIM(zip_code), 5)
-    ELSE NULL
+        WHEN REGEXP_MATCHES(TRIM(zip_code), '^[0-9]{5}(-[0-9]{4}|[0-9]{4})?$')
+            THEN LEFT(TRIM(zip_code), 5)
+        ELSE NULL
     END AS zip_code_5_digit,  
     CASE
         WHEN REGEXP_MATCHES(TRIM(zip_code), '^[0-9]{5}-[0-9]{4}$')
@@ -29,7 +29,11 @@ select
             lower(trim(addr1)),
             lower(trim(city)),
             lower(trim(state)),
-            zip_code
+            CASE
+                WHEN REGEXP_MATCHES(TRIM(zip_code), '^[0-9]{5}(-[0-9]{4}|[0-9]{4})?$')
+                    THEN LEFT(TRIM(zip_code), 5)
+                ELSE NULL
+            END 
         order by 
             merchant_outlet_number desc
     ) as dupe_record_rank,
