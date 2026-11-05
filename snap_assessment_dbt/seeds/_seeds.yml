@@ -1,0 +1,17 @@
+version: 2
+
+seeds:
+  - name: mcc_codes
+    description: >
+      Reference list of merchant category codes (MCC) and their descriptions. Public dataset
+      (github.com/greggles/mcc-codes, Unlicense), loaded as a lookup table.
+    config:
+      column_types:
+        mcc_id: varchar          # keep as text so codes like 0742 keep their leading zero
+    columns:
+      - name: mcc_id
+        data_tests: [not_null, unique]
+      - name: description
+        description: Plain-English name of the merchant category.
+
+

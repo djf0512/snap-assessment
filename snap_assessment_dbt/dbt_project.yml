@@ -19,6 +19,11 @@ clean-targets:         # directories to be removed by `dbt clean`
   - "dbt_packages"
 
 
+seeds:
+  snap_assessment_dbt:
+    +schema: reference
+
+
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
 

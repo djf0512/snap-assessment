@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: int_card_mcc
+    description: One row per card outlet per MCC code, with the code's description and closest Snap industry where mapped.
+    columns:
+      - name: merchant_outlet_number
+        data_tests: [not_null]
+      - name: mcc_id
+        description: A single merchant category code (split out of the ';' separated list).
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('mcc_codes')
+              field: mcc_id
+              config:
+                severity: warn     # warns about codes missing from the reference list instead of failing the build
+      - name: mcc_description
+        description: Plain-English category name from the mcc_codes seed. Null if the code isn't in the list.
+      - name: snap_industry
+        description: Closest Snap industry from the mcc_snap_industry seed. Null where no mapping was made.
