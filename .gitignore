@@ -7,3 +7,5 @@ warehouse/
 *.duckdb
 .env 
 .user.yml
+logs/
+target/
