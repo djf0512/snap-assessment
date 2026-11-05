@@ -1710,3 +1710,297 @@ fig = px.scatter(    df_plot,    x="apps_ytd",    y="approval_rate",    size="fu
 One caveat: a missing funding value isn't necessarily equivalent to zero funding. This replacement is just to make the visualization work; retain the distinction in your underlying data quality analysis.
 
 I'd also check whether any of the other chart fields have missing values, particularly apps_ytd and approval_rate. Those affect where the points appear, rather than just their size.
+
+
+i pushed my notebooks up to my github repo. the scatter figure doesn't show when viewing. how do i make sure it's shown?
+GitHub's notebook viewer doesn't always render Plotly figures reliably, especially when the notebook uses interactive JavaScript-based charts. The figure may display locally in Jupyter but appear blank on GitHub.
+
+For your Snap assessment, I'd recommend keeping the interactive Plotly chart in the notebook and adding a static PNG version as a fallback. That way, someone reviewing your GitHub repo can see the visualization without needing to interact with it.
+
+1. Save the Plotly figure as a PNG
+After creating your figure, add:
+
+fig.write_image("figures/snap_industry_performance.png")
+
+You'll need Kaleido:
+
+pip install kaleido
+
+Depending on your Plotly version, Kaleido may also require Chrome. If image export fails, check the Kaleido installation instructions.
+
+2. Display the image in your notebook
+Add a Markdown cell immediately after the chart:
+
+### Industry Performance
+
+![Snap Merchant Performance by Industry and Product](../figures/snap_industry_performance.png)
+Adjust the relative path based on where your notebook lives.
+
+For example, if your notebook is in analysis/ and the image is in figures/, that path is correct.
+
+3. Keep the interactive chart too
+Your notebook can still contain:
+
+fig.show()
+
+The static image is just a fallback for GitHub.
+
+4. Push the image to GitHub
+Make sure the figures/ directory isn't ignored by .gitignore, then:
+
+git add analysis/ figures/
+git commit -m "Add notebook visualizations"
+git push
+
+One additional option
+If you'd rather avoid maintaining separate PNG files, you can use Matplotlib for static visualizations. GitHub generally renders those notebook outputs very reliably.
+
+My recommendation: For this assessment, use Plotly for the analysis and interactivity, but save key charts as PNGs for GitHub. The reviewer should be able to understand your findings just by scrolling through the notebook, without having to run anything.
+
+This might also interest you.
+
+
+
+i tried the write_image and get:
+
+fig = px.scatter(
+    df_snap_performance,
+    x="apps_ytd",
+    y="approval_rate",
+    size="fund_ytd",  ##size of the bubble is the total funding YTD
+    color="product_type",  ##color of the bubble is the product type
+    hover_name="industry", ##hover over the bubble to see the industry name
+    hover_data={
+        "active_merchants": ":,",
+        "apps_ytd": ":,",
+        "aprv_ytd": ":,",
+        "approval_rate": ":.2f",
+        "cmpl_ytd": ":,",
+        "completion_rate": ":.2f",
+        "fund_ytd": ":$,.0f"
+    },
+    size_max=45,
+    title="Snap Merchant Performance by Industry and Product",
+    labels={
+        "apps_ytd": "Applications YTD",
+        "approval_rate": "Approval Rate (%)",
+        "product_type": "Product Type",
+        "fund_ytd": "Funding YTD"
+    }
+)
+
+fig.update_layout(
+    template="plotly_white",
+    height=650,
+    legend_title_text="Product Type"
+)
+
+fig.update_yaxes(ticksuffix="%")
+
+fig.show()
+
+fig.write_image("figures/snap_industry_performance.png")
+…
+Can you share the actual error message you get from fig.write_image()? That will help narrow it down.
+
+There are a few common causes. I'd check these in order.
+
+1. Make sure the output directory exists
+write_image() won't create the figures directory for you.
+
+from pathlib import Path
+
+Path("figures").mkdir(parents=True, exist_ok=True)
+
+fig.write_image("figures/snap_industry_performance.png")
+
+2. Check your Kaleido installation
+In your notebook, run:
+
+import plotly
+import kaleido
+
+print("Plotly:", plotly.__version__)
+print("Kaleido:", kaleido.__version__)
+
+If Kaleido isn't installed:
+
+pip install --upgrade kaleido
+
+If you're using a recent Kaleido version, it may also need Chrome installed. You can try:
+
+import plotly.io as pio
+
+pio.get_chrome()
+
+3. Check where the file is being saved
+Jupyter uses its current working directory, which may not be your project root.
+
+from pathlib import Path
+
+print(Path.cwd())
+
+That will tell you where the figures folder is being created.
+
+One thing I'd like to see: the full error traceback from fig.write_image(), particularly the last few lines. That should tell us whether this is a missing directory, Kaleido, or Chrome issue.
+
+This might also interest you.
+
+
+
+oops wrong thing, one sec, 
+--------------------------------------------------------------------------- FileNotFoundError                         Traceback (most recent call last) Cell In[4], line 37      33 fig.update_yaxes(ticksuffix="%")      34       35 fig.show()      36  ---> 37 fig.write_image("figures/snap_industry_performance.png")  File c:\dev\snap-assessment\.venv\Lib\site-packages\plotly\basedatatypes.py:3805, in BaseFigure.write_image(self, *args, **kwargs)    3758 """    3759 Convert a figure to a static image and write it to a file or writeable    3760 object    (...)   3801 None    3802 """    3803 import plotly.io as pio -> 3805 return pio.write_image(self, *args, **kwargs)  File c:\dev\snap-assessment\.venv\Lib\site-packages\plotly\io\_kaleido.py:297, in write_image(fig, file, format, scale, width, height, validate)     289         raise ValueError(     290             f"""     291 The 'file' argument '{file}' is not a string, pathlib.Path object, or file descriptor.     292 """     293         )     294     else:
+...
+   1011 if "b" not in mode:    1012     encoding = io.text_encoding(encoding) -> 1013 return io.open(self, mode, buffering, encoding, errors, newline)  FileNotFoundError: [Errno 2] No such file or directory: 'figures\\snap_industry_performance.png'
+
+…
+That's an easy one! The error means Python can't find the figures directory. write_image() creates the image file, but it doesn't create the parent directory.
+
+Add this immediately before fig.write_image():
+
+from pathlib import Path
+
+Path("figures").mkdir(parents=True, exist_ok=True)
+
+fig.write_image("figures/snap_industry_performance.png")
+
+This will:
+
+Create figures/ if it doesn't exist.
+
+Leave it alone if it already exists.
+
+Save your PNG inside it.
+
+One suggestion for your repo structure: Keep your visualizations in a dedicated figures/ directory at the project root:
+
+snap-assessment/
+├── analysis/
+│   └── snap_analysis.ipynb
+├── figures/
+│   └── snap_industry_performance.png
+├── data/
+├── docs/
+└── ...
+Then, in a Markdown cell in your notebook, reference the image using:
+
+![Snap Merchant Performance](../figures/snap_industry_performance.png)
+That should make the chart visible when someone browses the notebook on GitHub.
+
+ok, it doesn't show on my image.
+Let's troubleshoot the path first. There are two different things here: whether the PNG was successfully created, and whether the notebook can find it when rendering the Markdown.
+
+Run this cell:
+
+from pathlib import Path
+
+image_path = Path("figures/snap_industry_performance.png")
+
+print("Working directory:", Path.cwd())
+print("Image exists:", image_path.exists())
+print("Image path:", image_path.resolve())
+
+If Image exists is True, try displaying it directly in the notebook:
+
+from IPython.display import Image, display
+
+display(Image(filename=str(image_path)))
+
+If that works, the image itself is fine. The issue is probably the relative path in your Markdown cell.
+
+Since your notebook is in analysis/ and your image is in figures/, the Markdown should be:
+
+![Snap Merchant Performance](../figures/snap_industry_performance.png)
+One other thing: If you're saying the PNG file itself opens but is blank, that's a different problem. Let me know what happens with the display(Image(...)) test, and we'll narrow it down.
+
+i got it to work. i found my typo
+Nice! Glad it was just a typo. Now that the static image is rendering, it should show up when someone views the notebook on GitHub, too.
+
+so a field that should be int has one value of "cash" how can i make that null if string and not int? 
+
+this is my query:
+select
+    speedeonid,
+    "name" as company_name_raw,
+    lower(trim("name")) as company_name_clean,
+    alternative_name as alternative_name_raw,
+    lower(trim(alternative_name)) as alternative_name_clean, 	
+    street as street_address_raw,
+    lower(trim(street)) as street_address_clean,
+    city as city_raw,
+    lower(trim(city)) as city_clean,
+    state as state_raw,
+    lower(trim(state)) as state_clean,
+    postal_code as zip_code_raw,
+    CASE
+        WHEN REGEXP_MATCHES(TRIM(postal_code), '^[0-9]{5}(-[0-9]{4}|[0-9]{4})?$')
+            THEN LEFT(TRIM(postal_code), 5)
+        ELSE NULL
+    END AS zip_code_5_digit,  
+    CASE
+        WHEN REGEXP_MATCHES(TRIM(postal_code), '^[0-9]{5}-[0-9]{4}$')
+            THEN TRIM(postal_code)
+        WHEN REGEXP_MATCHES(TRIM(postal_code), '^[0-9]{9}$')
+            THEN LEFT(TRIM(postal_code), 5) || '-' || RIGHT(TRIM(postal_code), 4)
+        ELSE NULL
+    END AS zip_code_plus_4,
+    primary_sic_code_id,
+    labels_primary_sic_code_id,
+    location_employee_count::int as location_employee_count,
+    labels_square_footage,
+    rank() over (
+        partition by 
+            lower(trim("name")),
+            lower(trim(street)),
+            lower(trim(city)),
+            lower(trim(state)),
+            postal_code
+        order by 
+            speedeonid desc
+    ) as dupe_record_rank,
+    _loaded_at as loaded_at
+from {{ source('raw', 'purchased_list') }}
+…
+In DuckDB, you can use TRY_CAST() instead of CAST() or ::int.
+
+TRY_CAST() attempts the conversion and returns NULL if the value can't be converted to an integer.
+
+Replace:
+
+location_employee_count::int as location_employee_count,
+
+with:
+
+TRY_CAST(TRIM(location_employee_count) AS INTEGER) AS location_employee_count,
+
+This handles:
+
+"150" → 150
+
+"cash" → NULL
+
+'' → NULL
+
+NULL → NULL
+
+I'd recommend TRY_CAST here because you're building a staging model. It lets the pipeline continue when it encounters unexpected source values instead of failing.
+
+One additional thought: since you're evaluating data quality for the Snap assessment, consider retaining the raw field alongside the cleaned field:
+
+location_employee_count AS location_employee_count_raw,
+TRY_CAST(TRIM(location_employee_count) AS INTEGER) AS location_employee_count,
+
+That gives you both:
+
+The original source value for traceability.
+
+A usable numeric field for analysis.
+
+The ability to identify invalid values like "cash" rather than silently losing that information.
+
+You could then quantify invalid non-null values in a separate data quality check.
+
+For cleaning/typing your source fields, here’s an integration automation option.
+
+
+
