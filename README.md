@@ -7,10 +7,11 @@ Goal(s):
 ## Layout
 
 ```
-analysis/           Jupyter notebooks analyzing data
-chat_logs/          requested export of AI conversations
-data/raw/           Snap Excel file (git-ignored)
-docs/               notes
-ingestion/          python loader to raw layer
-warehouse/          local database (git-ignored)
+analysis/               Jupyter notebooks analyzing data
+chat_logs/              requested export of AI conversations
+data/raw/               Snap Excel file (git-ignored)
+docs/                   notes
+ingestion/              python loader to raw layer
+warehouse/              local database (git-ignored)
+snap_assessment_dbt/    dbt project
 ```

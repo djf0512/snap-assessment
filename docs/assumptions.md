@@ -1,6 +1,6 @@
-## Assumptions
+# Assumptions
 
-### Duplicates
+## Duplicates
 
 In 01_data_quality.ipynb you can see each dataset has a duplicate problem. I would prefer to do more research on best way to select the best record for duplicates, but for now going on some quick way to rank based of assuming I understand the data correctly.
 
@@ -19,7 +19,7 @@ Each one is partitioned the same:
 ```
 How the sort happened varied per dataset, which can be seen below:
 
-#### card_list
+### card_list
 ``` sql
     rank() over (
         partition by 
@@ -34,7 +34,7 @@ How the sort happened varied per dataset, which can be seen below:
 ```
 This one I'm making the assumption that `merchant_outlet_number` is added in numerical order (larger the id value, it's more recent addition) and you want the more recent one.
 
-#### purchased_list
+### purchased_list
 ``` sql
     rank() over (
         partition by 
@@ -49,7 +49,7 @@ This one I'm making the assumption that `merchant_outlet_number` is added in num
 ```
 This one I'm making the assumption that `speedeonid` is added in numerical order (larger the id value, it's more recent addition) and you want the more recent one.
 
-#### salesforce_list
+### salesforce_list
 ``` sql
     rank() over (
         partition by 
@@ -69,7 +69,7 @@ This one I'm making the assumption that `speedeonid` is added in numerical order
 For this one, I figured that you wouldn't want to look at Disqualified accounts, prefer ones that have an opportunity value, complete address, meta data is there, and finally use the id like above.
 
 
-#### snap
+### snap
 ``` sql
     rank() over (
         partition by 
@@ -85,7 +85,7 @@ For this one, I figured that you wouldn't want to look at Disqualified accounts,
 ```
 I ranked the active accounts higher then use the id field like others above.
 
-#### website_list
+### website_list
 ``` sql
     rank() over (
         partition by 
@@ -103,3 +103,9 @@ I ranked the active accounts higher then use the id field like others above.
     )
 ```
 This dataset does not have an unique id. So if going to production, would definitely work on creating unique rows and an ID, but for now some ranking. The ranking looked for complete address, industry data is field, more specific industry value, the lead id, and then industry subcategory has a value. 
+
+## Joining datasets
+
+Since shared ID between the datasets, I am using slightly cleaner versions of business is name + street + 5-digit ZIP. Then exact matching only, so this is probably the smallest amount of connections that will happen (floor). 
+
+I would prefer to clean the address better and possibly work with fuzzy name matching, but given time restraints starting with the cleanest matches.
