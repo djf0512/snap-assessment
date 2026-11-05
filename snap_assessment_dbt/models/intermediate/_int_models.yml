@@ -17,5 +17,3 @@ models:
                 severity: warn     # warns about codes missing from the reference list instead of failing the build
       - name: mcc_description
         description: Plain-English category name from the mcc_codes seed. Null if the code isn't in the list.
-      - name: snap_industry
-        description: Closest Snap industry from the mcc_snap_industry seed. Null where no mapping was made.
