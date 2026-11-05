@@ -1,0 +1,7 @@
+snap_assessment_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../warehouse/snap-assessment.duckdb
+      threads: 5

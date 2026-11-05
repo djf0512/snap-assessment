@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Source of excel from instructions, loaded by ingestion/load_excel_to_duckdb.py. These are the raw source files, with no transformations applied.
+    schema: raw
+    config:
+      loaded_at_field: _loaded_at
+    tables:
+      - name: card_list
+        description: Merchant list derived from card activity, intended for prospecting.
+      - name: purchased_list
+        description: Third-party purchased business list with business classification and location enrichment attributes.
+      - name: salesforce_list
+        description: CRM extract of lead records with status, vertical, opportunity sizing, and competitive information.
+      - name: snap
+        description: Internal merchant list with current status and year-to-date production metrics. Please note that all KPI's here are meant to mirror snap trends, but are not actual values associated with any snap locations.
+      - name: website_list
+        description: Lead intake data captured from website forms, including self-reported business and vertical details.
+        
+

@@ -1,0 +1,208 @@
+version: 2
+
+models:
+  - name: stg_card_list
+    description: Staging model for the raw.card_list source table. Merchant list derived from card activity, intended for prospecting.
+    columns:
+      - name: merchant_outlet_number	
+        description: ID	Outlet/location identifier from the card source.
+        data_tests: [not_null, unique]
+      - name: company_name_raw
+        description: Merchant name from the card reader from the card source.
+      - name: company_name_clean
+        description: Merchant name cleaned and normalized for comparison.
+      - name: street_address_raw
+        description: Primary street address. Raw address line only.
+      - name: street_address_clean
+        description: Primary street address cleaned and normalized for comparison.
+      - name: city_raw
+        description: Merchant city.
+      - name: city_clean
+        description: Merchant city cleaned and normalized for comparison.
+      - name: state_raw
+        description: Merchant state abbreviation.
+      - name: state_clean
+        description: Merchant state abbreviation cleaned and normalized for comparison.
+      - name: zip_code_raw
+        description: Merchant ZIP code. Raw ZIP code only. Mix of 5-digit and 9-digit ZIP codes, some with hyphen, some without.
+      - name: zip_code_5_digit
+        description: Merchant ZIP code.	5-digit ZIP code only.
+      - name: zip_code_plus_4
+        description: Merchant ZIP code.	9-digit ZIP code only, with hyphen.
+      - name: mcc_id_list
+        description: Merchant category code(s).	Some rows contain multiple MCCs separated by ;.
+      - name: last_activity_period
+        description: Categorical text	Recency bucket for observed card activity. Useful as an activity freshness signal, or if a business is closed
+      - name: dupe_record_rank
+        description: Rank of duplicate records for the same merchant name and address. Lower rank is preferred.
+      - name: loaded_at
+        description: Timestamp of when the record was loaded into the raw data source.
+  
+  - name: stg_purchased_list
+    description: Staging model for the raw.purchased_list source table. Third-party purchased business list with business classification and location enrichment attributes.
+    columns:
+      - name: speedeonid
+        description: Vendor-specific location or business identifier.
+        data_tests: [not_null, unique]
+      - name: company_name_raw	
+        description: Primary business name from the source.	Main business-name field.
+      - name: company_name_clean
+        description: Primary business name cleaned and normalized for comparison.	Main business-name field.
+      - name: alternative_name_raw
+        description: Alternate or alias business name from the source.	Sparse; useful for fuzzy matching.
+      - name: alternative_name_clean
+        description: Alternate or alias business name cleaned and normalized for comparison.	Sparse; useful for fuzzy matching.
+      - name: street_address_raw
+        description: Street address from the source.	Raw source address.
+      - name: street_address_clean
+        description: Street address cleaned and normalized for comparison.
+      - name: city_raw
+        description: City name from the source.
+      - name: city_clean
+        description: City name cleaned and normalized for comparison.
+      - name: state_raw
+        description: State abbreviation from the source.
+      - name: state_clean
+        description: State abbreviation cleaned and normalized for comparison.
+      - name: zip_code_raw
+        description: ZIP or ZIP+4 code from the source.	Contains 5-digit and ZIP+4 formats.
+      - name: zip_code_5_digit
+        description: 5-digit ZIP code only.
+      - name: zip_code_plus_4
+        description: 9-digit ZIP code only, with hyphen.
+      - name: primary_sic_code_id
+        description: Primary SIC classification code.	This is another way of indicating specific industries
+      - name: labels_primary_sic_code_id
+        description: Human-readable SIC category label.	Description paired to SIC code.
+      - name: location_employee_count
+        description: Estimated employee count at the location.	
+      - name: labels_square_footage
+        description: Square-footage bucket for the location. Bucketed, not exact square footage.
+      - name: dupe_record_rank
+        description: Rank of duplicate records for the same merchant name and address. Lower rank is preferred.
+      - name: loaded_at
+        description: Timestamp of when the record was loaded into the raw data source.
+  
+  - name: stg_salesforce_list
+    description: Staging model for the raw.salesforce_list source table. CRM extract of lead records with status, vertical, opportunity sizing, and competitive information.
+    columns:
+      - name: id	
+        description: Salesforce record identifier.
+        data_tests: [not_null, unique]
+      - name: company_name_raw
+        description: Lead or account company name.	Primary name for CRM matching.
+      - name: company_name_clean
+        description: Lead or account company name cleaned and normalized for comparison.	
+      - name: street_address_raw
+        description: Street address from Salesforce.
+      - name: street_address_clean
+        description: Street address cleaned and normalized for comparison.
+      - name: city_raw
+        description: City from Salesforce.
+      - name: city_clean
+        description: City name cleaned and normalized for comparison.
+      - name: state_raw
+        description: State abbreviation from Salesforce.
+      - name: state_clean
+        description: State abbreviation cleaned and normalized for comparison.
+      - name: zip_code_raw
+        description: ZIP code field in Salesforce. Only 5 digit.
+      - name: zip_code_5_digit
+        description: 5-digit ZIP code only.
+      - name: industry_vertical__c
+        description: Salesforce industry vertical classification.
+      - name: total_snap_opportunity_tso__c
+        description: Currency USD dollars. Estimated Snap opportunity value.
+      - name: status
+        description: Lead/account lifecycle status.	Observed statuses include Converted, Working, and Disqualified.
+      - name: disqualified_reason__c
+        description: Reason the lead was disqualified. Populated mainly for disqualified rows.
+      - name: age_of_lead__c
+        description: Age of lead in days.
+      - name: competitor_1_pll__c
+        description: Primary competitor noted on the record.
+      - name: dupe_record_rank
+        description: Rank of duplicate records for the same merchant name and address. Lower rank is preferred.
+      - name: loaded_at
+        description: Timestamp of when the record was loaded into the raw data source.
+
+  - name: stg_snap 
+    description: Internal merchant list with current status and year-to-date production metrics. Please note that all KPI's here are meant to mirror snap trends, but are not actual values associated with any snap locations.
+    columns:
+      - name: mid
+        description: Internal merchant identifier.
+        data_tests: [not_null, unique]
+      - name: company_name_raw
+        description: Primary business name from the source.	Main business-name field.
+      - name: company_name_clean
+        description: Primary business name cleaned and normalized for comparison.	Main business-name field.
+      - name: street_address_raw
+        description: Merchant street address. Raw source address.
+      - name: street_address_clean
+        description: Street address cleaned and normalized for comparison.
+      - name: city_raw
+        description: Merchant city.
+      - name: city_clean
+        description: City name cleaned and normalized for comparison.
+      - name: state_raw
+        description: Merchant state abbreviation.
+      - name: state_clean
+        description: State abbreviation cleaned and normalized for comparison.
+      - name: zip_code_raw
+        description: Contains 5-digit formats.
+      - name: zip_code_5_digit
+        description: cleaned to ensure 5-digit ZIP code only.
+      - name: is_inactivated
+        description: Flag indicating if the merchant is inactivated. 1 = Inactivated, 0 = Active.
+      - name: industry
+        description: Snap industry/vertical classification.
+      - name: product_type
+        description: Snap product assigned to the merchant based on industry and state. Observed values include Loan and Lease.
+      - name: apps_ytd
+        description: Year-to-date application count.
+      - name: aprv_ytd
+        description: Year-to-date approval count.
+      - name: cmpl_ytd
+        description: Year-to-date completion count.
+      - name: fund_ytd
+        description: Year-to-date funded dollar volume.
+      - name: dupe_record_rank
+        description: Rank of duplicate records for the same merchant name and address. Lower rank is preferred.
+      - name: loaded_at
+        description: Timestamp of when the record was loaded into the raw data source.
+    
+  - name: stg_website_list
+    description: Staging model for the raw.website_list source table. Lead intake data captured from website forms, including self-reported business and vertical details.
+    columns:
+      - name: form_name	
+        description: Name/type of website form submitted.	LONG_FORM	Observed as a small controlled set.
+      - name: lead_id
+        description: Unique website lead submission identifier. Mostly unique in the sample.
+      - name: company_name_raw
+        description: Submitted business name.	Primary name for intake matching.
+      - name: company_name_clean
+        description: Submitted business name cleaned and normalized for comparison.	Primary name for intake matching.
+      - name: street_address_raw
+        description: Submitted street address.
+      - name: street_address_clean
+        description: Submitted street address cleaned and normalized for comparison.
+      - name: city_raw
+        description: Submitted city.
+      - name: city_clean
+        description: Submitted city cleaned and normalized for comparison.
+      - name: state_raw
+        description: Submitted state abbreviation.
+      - name: state_clean
+        description: Submitted state abbreviation cleaned and normalized for comparison.
+      - name: zip_code_raw
+        description: Submitted ZIP code.
+      - name: zip_code_5_digit
+        description: Cleaned to ensure 5-digit ZIP code only.
+      - name: industry_name
+        description: Top-level industry selected by the lead.	Higher-level than subcategory.
+      - name: industry_desc
+        description: Human-readable industry description.		
+      - name: industry_subcategory
+        description: Selected subcategory code.	Granular vertical for routing/matching.
+      - name: industry_subcategory_desc
+        description: Human-readable subcategory description.	Label paired to the code field.
