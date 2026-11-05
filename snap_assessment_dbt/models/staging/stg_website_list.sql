@@ -4,7 +4,7 @@ select
     business_name as company_name_raw,
     lower(trim(business_name)) as company_name_clean,
     street_address as street_address_raw,
-    lower(trim(street_address)) as street_address_clean,
+    lower(trim(split_part(street_address, ',', 1))) as street_address_clean,
     city as city_raw,
     lower(trim(city)) as city_clean,
     state as state_raw,

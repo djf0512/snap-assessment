@@ -25,7 +25,7 @@ select
     END AS zip_code_plus_4,
     primary_sic_code_id,
     labels_primary_sic_code_id,
-    location_employee_count::int as location_employee_count,
+    TRY_CAST(TRIM(location_employee_count) AS INTEGER) as location_employee_count,
     labels_square_footage,
     rank() over (
         partition by 
